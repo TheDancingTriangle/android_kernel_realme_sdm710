@@ -984,6 +984,10 @@ struct user_struct {
 #if defined(CONFIG_PERF_EVENTS) || defined(CONFIG_BPF_SYSCALL)
 	atomic_long_t locked_vm;
 #endif
+
+#ifdef CONFIG_KSU_SUSFS
+	u64 android_kabi_reserved2;
+#endif
 };
 
 extern int uids_sysfs_init(void);
@@ -2231,6 +2235,11 @@ struct task_struct {
 	struct fuse_package *fpack;
 #endif /* CONFIG_OPLUS_FEATURE_FUSE_FS_SHORTCIRCUIT */
 /* CPU-specific state of this task */
+#ifdef CONFIG_KSU_SUSFS
+	u64 susfs_task_state;
+	u64 susfs_last_fake_mnt_id;
+	u64 android_kabi_reserved8;
+#endif
 	struct thread_struct thread;
 /*
  * WARNING: on x86, 'thread_struct' contains a variable-sized
