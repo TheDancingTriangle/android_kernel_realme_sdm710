@@ -157,28 +157,28 @@ EXPORT_SYMBOL_GPL(probe_user_write);
  * If @count is smaller than the length of the string, copies @count-1 bytes,
  * sets the last byte of @dst buffer to NUL and returns @count.
  */
-long strncpy_from_user_nofault(char *dst, const void *unsafe_addr, long count)
+
+long ksu_strncpy_from_user_nofault(char *dst, const void __user *unsafe_addr,
+				   long count)
 {
 	mm_segment_t old_fs = get_fs();
-	const void *src = unsafe_addr;
 	long ret;
-
 	if (unlikely(count <= 0))
 		return 0;
-
-	set_fs(KERNEL_DS);
+	set_fs(USER_DS);
 	pagefault_disable();
-
-	do {
-		ret = __get_user(*dst++, (const char __user __force *)src++);
-	} while (dst[-1] && ret == 0 && src - unsafe_addr < count);
-
-	dst[-1] = '\0';
+	ret = strncpy_from_user(dst, unsafe_addr, count);
 	pagefault_enable();
 	set_fs(old_fs);
-
-	return ret ? -EFAULT : src - unsafe_addr;
+	if (ret >= count) {
+		ret = count;
+		dst[ret - 1] = '\0';
+	} else if (ret > 0) {
+		ret++;
+	}
+	return ret;
 }
+#endif
 
 /**
  * strncpy_from_unsafe_user: - Copy a NUL terminated string from unsafe user
