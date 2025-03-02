@@ -271,7 +271,7 @@ qdf_export_symbol(qdf_wake_lock_create);
  * QDF status success: if wake lock is acquired
  * QDF status failure: if wake lock was not acquired
  */
-DF_STATUS qdf_wake_lock_acquire(qdf_wake_lock_t *lock, uint32_t reason)
+QDF_STATUS qdf_wake_lock_acquire(qdf_wake_lock_t *lock, uint32_t reason)
 {
 	return QDF_STATUS_SUCCESS;
 }
