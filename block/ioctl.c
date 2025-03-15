@@ -441,6 +441,11 @@ static int blkdev_roset(struct block_device *bdev, fmode_t mode,
 		return -EACCES;
 	if (get_user(n, (int __user *)arg))
 		return -EFAULT;
+	if (bdev->bd_disk->fops->set_read_only) {
+		ret = bdev->bd_disk->fops->set_read_only(bdev, n);
+		if (ret)
+			return ret;
+	}
 	set_device_ro(bdev, n);
 	return 0;
 }
@@ -564,6 +569,8 @@ int blkdev_ioctl(struct block_device *bdev, fmode_t mode, unsigned cmd,
 		if ((size >> 9) > ~0UL)
 			return -EFBIG;
 		return put_ulong(arg, size >> 9);
+	case BLKGETSTPART:
+		return put_ulong(arg, bdev->bd_part->start_sect);
 	case BLKGETSIZE64:
 		return put_u64(arg, i_size_read(bdev->bd_inode));
 	case BLKTRACESTART:
