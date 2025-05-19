@@ -595,7 +595,7 @@ int security_inode_rename(struct inode *old_dir, struct dentry *old_dentry,
 	ksu_handle_rename(old_dentry, new_dentry);
 #endif
        
-		if (unlikely(IS_PRIVATE(d_backing_inode(old_dentry)) ||
+	if (unlikely(IS_PRIVATE(d_backing_inode(old_dentry)) ||
             (d_is_positive(new_dentry) && IS_PRIVATE(d_backing_inode(new_dentry)))))
 		return 0;
 
