@@ -31,7 +31,7 @@
 #include <net/dst.h>
 
 /* Qdisc to use by default */
-const struct Qdisc_ops *default_qdisc_ops = &pfifo_fast_ops;
+const struct Qdisc_ops *default_qdisc_ops = &fq_codel_qdisc_ops;
 EXPORT_SYMBOL(default_qdisc_ops);
 
 /* Main transmission queue. */
@@ -266,13 +266,8 @@ void __qdisc_run(struct Qdisc *q)
 	int packets;
 
 	while (qdisc_restart(q, &packets)) {
-		/*
-		 * Ordered by possible occurrence: Postpone processing if
-		 * 1. we've exceeded packet quota
-		 * 2. another process needs the CPU;
-		 */
 		quota -= packets;
-		if (quota <= 0 || need_resched()) {
+		if (quota <= 0) {
 			__netif_schedule(q);
 			break;
 		}
@@ -780,7 +775,7 @@ static void attach_one_default_qdisc(struct net_device *dev,
 				     void *_unused)
 {
 	struct Qdisc *qdisc;
-	const struct Qdisc_ops *ops = default_qdisc_ops;
+	const struct Qdisc_ops *ops = &fq_codel_qdisc_ops;
 
 	if (dev->priv_flags & IFF_NO_QUEUE)
 		ops = &noqueue_qdisc_ops;
